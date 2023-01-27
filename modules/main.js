@@ -19,6 +19,7 @@ import {
 //my modules imports
 import { firebaseConfig } from './firebase.js';
 import { createRegisterLoginForm, createLogOutIcon } from './register_form.js';
+import { createCategoryForm } from './createCategoryForm.js';
 
 // Initialize Firebase, database, authentication
 const app = initializeApp(firebaseConfig);
@@ -78,6 +79,54 @@ const loginUser = (e) => {
 }
 
 
+//user status functionality
+const user = auth.currentUser;
+
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        const uid = user.uid;
+        console.log(uid)
+        //jei prisijunges, uzkraunas atsijungimo mygtuka
+        createLogOutIcon();
+        document.getElementById('signOut').addEventListener('click', logOut);
+        //kokia userio role
+        get(ref(database, 'users/' + user.uid))
+            .then((snapshot) => {
+                const userData = snapshot.val();
+                //jei user yra admin
+                if (userData.role === 'admin') {
+                    console.log(userData.role);
+                    //rodyk kategorijos ivedimo forma
+                    createCategoryForm();
+                    const addCategory = (e) => {
+                        e.preventDefault();
+                        const category_name = document.getElementById('category_name').value;
+                        console.log(category_name)
+                        push(ref(database, 'categories'), {
+                            name: category_name,
+                        })
+                            .then(console.log(`saved ${category_name}`))
+                            .catch((error) => {
+                                console.log(error);
+                            });
+                    }
+                    document.getElementById('category').addEventListener('click', addCategory);
+                }
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+
+
+
+    } else {
+        //jei atsijunges, rodome prisijungimo forma
+        createRegisterLoginForm();
+        document.getElementById('user_register').addEventListener('click', registerNewUser);
+        document.getElementById('user_login').addEventListener('click', loginUser);
+    }
+});
+
 //sign-out
 const logOut = () => {
     signOut(auth).then(() => {
@@ -88,19 +137,3 @@ const logOut = () => {
         console.log(errorMessage);
     });
 }
-
-
-//user status functionality
-const user = auth.currentUser;
-
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        const uid = user.uid;
-        createLogOutIcon();
-        document.getElementById('signOut').addEventListener('click', logOut);
-    } else {
-        createRegisterLoginForm();
-        document.getElementById('user_register').addEventListener('click', registerNewUser);
-        document.getElementById('user_login').addEventListener('click', loginUser);
-    }
-});
