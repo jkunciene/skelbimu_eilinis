@@ -25,6 +25,7 @@ const createCategoryForm = () => {
 
     let category_table = document.createElement('table');
     category_table.id = 'table';
+    category_table.classList.add("table", "my-5");
     place.appendChild(category_table);
 }
 

@@ -97,6 +97,7 @@ onAuthStateChanged(auth, (user) => {
                 //jei user yra admin
                 if (userData.role === 'admin') {
                     console.log(userData.role);
+
                     //rodyk kategorijos ivedimo forma
                     createCategoryForm();
                     const addCategory = (e) => {
@@ -104,7 +105,7 @@ onAuthStateChanged(auth, (user) => {
                         const category_name = document.getElementById('category_name').value;
                         console.log(category_name)
 
-                        set(ref(database, "categories/" + category_name), {
+                        push(ref(database, "categories/"), {
                             name: category_name
                         })
 
@@ -116,23 +117,31 @@ onAuthStateChanged(auth, (user) => {
                     document.getElementById('category').addEventListener('click', addCategory);
 
                     //rodyk kategoriju lentele
- 
+
                     onValue(ref(database, "categories/"), (snapshot) => {
                         let categories = snapshot.val()
-                       
-                        let cat_table = document.getElementById('table');                     
+
+                        let cat_table = document.getElementById('table');
                         cat_table.innerHTML = "";
+                        let th_row = document.createElement('thead');
+                        th_row.innerHTML = `  
+                                         <tr class="my-3">                                                   
+                                            <th scope="col">Category name</th>
+                                            <th scope="col">Remove Category</th>
+                                        </tr> `;
+                        cat_table.appendChild(th_row);
 
                         for (let c in categories) {
-                            let cat_tr = document.createElement("tr");
-                            let cat_td = document.createElement("td")
-                            cat_td.innerText = c
+                            let cat_tr = document.createElement("tr"); 
+                            cat_tr.className = "table-secondary";                      
+                            let cat_td = document.createElement("td");
+                            cat_td.innerText = categories[c].name
 
-                            let category_td = document.createElement("td")
-                            let cat_del = document.createElement("button")
-                            cat_del.classList = "m-1 btn btn-danger btn-sm admin-button"
+                            let category_td = document.createElement("td");
+                            let cat_del = document.createElement("button");
+                            cat_del.classList.add("btn", "btn-outline-danger");
                             cat_del.textContent = "DELETE"
-                            category_td.appendChild(cat_del)
+                            category_td.appendChild(cat_del);
 
                             // delete category
                             function deleteCategory() {
@@ -140,10 +149,12 @@ onAuthStateChanged(auth, (user) => {
                                 console.log("Category deleted successfully");
                             }
 
-                            cat_del.parentNode.addEventListener("click", deleteCategory)
-                            cat_tr.appendChild(cat_td)
-                            cat_tr.appendChild(category_td)                            
-                            cat_table.appendChild(cat_tr)
+                            cat_del.parentNode.addEventListener("click", deleteCategory);
+
+                            cat_tr.appendChild(cat_td);
+                            cat_tr.appendChild(category_td);
+
+                            cat_table.appendChild(cat_tr);
                         }
                     })
                 } else {
