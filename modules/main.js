@@ -5,7 +5,8 @@ import {
     set, update,
     ref, get,
     child, remove,
-    push
+    push,
+    onValue
 } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-database.js";
 import {
     getAuth,
@@ -102,15 +103,52 @@ onAuthStateChanged(auth, (user) => {
                         e.preventDefault();
                         const category_name = document.getElementById('category_name').value;
                         console.log(category_name)
-                        push(ref(database, 'categories'), {
-                            name: category_name,
+
+                        set(ref(database, "categories/" + category_name), {
+                            name: category_name
                         })
+
                             .then(console.log(`saved ${category_name}`))
                             .catch((error) => {
                                 console.log(error);
                             });
                     }
                     document.getElementById('category').addEventListener('click', addCategory);
+
+                    //rodyk kategoriju lentele
+ 
+                    onValue(ref(database, "categories/"), (snapshot) => {
+                        let categories = snapshot.val()
+                       
+                        let cat_table = document.getElementById('table');                     
+                        cat_table.innerHTML = "";
+
+                        for (let c in categories) {
+                            let cat_tr = document.createElement("tr");
+                            let cat_td = document.createElement("td")
+                            cat_td.innerText = c
+
+                            let category_td = document.createElement("td")
+                            let cat_del = document.createElement("button")
+                            cat_del.classList = "m-1 btn btn-danger btn-sm admin-button"
+                            cat_del.textContent = "DELETE"
+                            category_td.appendChild(cat_del)
+
+                            // delete category
+                            function deleteCategory() {
+                                remove(ref(database, "categories/" + c))
+                                console.log("Category deleted successfully");
+                            }
+
+                            cat_del.parentNode.addEventListener("click", deleteCategory)
+                            cat_tr.appendChild(cat_td)
+                            cat_tr.appendChild(category_td)                            
+                            cat_table.appendChild(cat_tr)
+                        }
+                    })
+                } else {
+                    console.log("paprastas useris");
+
                 }
             })
             .catch((error) => {

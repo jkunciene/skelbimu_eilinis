@@ -23,6 +23,9 @@ const createCategoryForm = () => {
     formCategory.appendChild(categoryBtn);
     place.appendChild(formCategory);
 
+    let category_table = document.createElement('table');
+    category_table.id = 'table';
+    place.appendChild(category_table);
 }
 
 export { createCategoryForm }
